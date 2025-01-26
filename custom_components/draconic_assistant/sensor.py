@@ -16,7 +16,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     field_drain_rate_sensor = CustomSensor("Field Drain Rate", device_id, 0, unit_of_measurement="RF/t")
     fuel_conversion_sensor = CustomSensor("Fuel Conversion", device_id, 0, unit_of_measurement="%")
     fuel_conversion_rate_sensor = CustomSensor("Fuel Conversion Rate", device_id, 0)
-    failsafe_sensor = CustomSensor("Failsafe", device_id, 0)
+    failsafe_sensor = CustomSensor("Failsafe", device_id, "false")
     input_energy_sensor = CustomSensor("Input Energy", device_id, 0, unit_of_measurement="RF/t")
     output_energy_sensor = CustomSensor("Output Energy", device_id, 0, unit_of_measurement="RF/t")
 
