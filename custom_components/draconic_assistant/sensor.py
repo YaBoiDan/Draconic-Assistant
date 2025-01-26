@@ -62,6 +62,8 @@ class CustomSensor(SensorEntity):
         self._attr_native_value = state
         self._attr_unit_of_measurement = unit_of_measurement
         self._device_id = device_id
+        self._attr_unique_id = f"{device_id}_{name.lower().replace(' ', '_')}"
+
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -88,6 +90,8 @@ class CalculatedSensor(SensorEntity):
         self._max_sensor = max_sensor
         self._attr_unit_of_measurement = unit_of_measurement
         self._device_id = device_id
+        self._attr_unique_id = f"{device_id}_{name.lower().replace(' ', '_')}"
+
 
     @property
     def device_info(self) -> DeviceInfo:
