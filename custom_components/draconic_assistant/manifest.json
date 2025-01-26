@@ -1,0 +1,9 @@
+{
+    "domain": "draconic_assistant",
+    "name": "Draconic Assistant",
+    "version": "0.1",
+    "documentation": "https://github.com/YaBoiDan/Draconic-Assistant",
+    "dependencies": [],
+    "requirements": [],
+    "codeowners": ["@YaBoiDan"]
+}
