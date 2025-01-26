@@ -1,5 +1,6 @@
 from homeassistant import config_entries
 from .const import DOMAIN
+import voluptuous as vol
 
 class DraconicReactorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for the Draconic Reactor integration."""
