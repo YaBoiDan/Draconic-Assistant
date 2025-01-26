@@ -1,57 +1,63 @@
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity import DeviceInfo
+from .const import DOMAIN
 
-DOMAIN = "draconic_reactor"
-
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    # Create a device and its entities
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up sensors from a config entry."""
     device_id = "draconic_reactor"
 
-    # Create the base sensors
-    field_strength_sensor = CustomSensor("Field Strength", device_id, 0)
-    max_field_strength_sensor = CustomSensor("Max Field Strength", device_id, 0)
+    # Create base sensors
+    status_sensor = CustomSensor("Status", device_id, "Unknown")
+    temperature_sensor = CustomSensor("Temperature", device_id, 0, unit_of_measurement="°C")
     saturation_sensor = CustomSensor("Saturation", device_id, 0)
     max_saturation_sensor = CustomSensor("Max Saturation", device_id, 0)
+    field_strength_sensor = CustomSensor("Field Strength", device_id, 0)
+    max_field_strength_sensor = CustomSensor("Max Field Strength", device_id, 0)
+    field_drain_rate_sensor = CustomSensor("Field Drain Rate", device_id, 0, unit_of_measurement="RF/t")
+    fuel_conversion_sensor = CustomSensor("Fuel Conversion", device_id, 0, unit_of_measurement="%")
+    fuel_conversion_rate_sensor = CustomSensor("Fuel Conversion Rate", device_id, 0)
+    failsafe_sensor = CustomSensor("Failsafe", device_id, 0)
+    input_energy_sensor = CustomSensor("Input Energy", device_id, 0, unit_of_measurement="RF/t")
+    output_energy_sensor = CustomSensor("Output Energy", device_id, 0, unit_of_measurement="RF/t")
 
-    # Create the calculated percentage sensors
+    # Create calculated percentage sensors
     saturation_percentage_sensor = CalculatedSensor(
         "Saturation Percentage",
         device_id,
         saturation_sensor,
         max_saturation_sensor,
-        "%",
+        unit_of_measurement="%",
     )
     field_strength_percentage_sensor = CalculatedSensor(
         "Field Strength Percentage",
         device_id,
         field_strength_sensor,
         max_field_strength_sensor,
-        "%",
+        unit_of_measurement="%",
     )
 
     # Add all sensors to Home Assistant
-    entities = [
-        CustomSensor("Status", device_id, "Unknown"),
-        CustomSensor("Temperature", device_id, 0, unit_of_measurement="°C"),
+    async_add_entities([
+        status_sensor,
+        temperature_sensor,
         saturation_sensor,
         max_saturation_sensor,
+        saturation_percentage_sensor,
         field_strength_sensor,
         max_field_strength_sensor,
-        saturation_percentage_sensor,
         field_strength_percentage_sensor,
-        CustomSensor("Field Drain Rate", device_id, 0),
-        CustomSensor("Fuel Conversion", device_id, 0, unit_of_measurement="%"),
-        CustomSensor("Fuel Conversion Rate", device_id, 0),
-        CustomSensor("Failsafe", device_id, 0),
-        CustomSensor("Input Energy", device_id, 0, unit_of_measurement="RF/t"),
-        CustomSensor("Output Energy", device_id, 0, unit_of_measurement="RF/t"),
-    ]
-
-    async_add_entities(entities, update_before_add=True)
+        field_drain_rate_sensor,
+        fuel_conversion_sensor,
+        fuel_conversion_rate_sensor,
+        failsafe_sensor,
+        input_energy_sensor,
+        output_energy_sensor,
+    ], update_before_add=True)
 
 
 class CustomSensor(SensorEntity):
     def __init__(self, name, device_id, state, unit_of_measurement=None):
+        """Initialize a basic sensor."""
         self._attr_name = name
         self._attr_native_value = state
         self._attr_unit_of_measurement = unit_of_measurement
@@ -59,6 +65,7 @@ class CustomSensor(SensorEntity):
 
     @property
     def device_info(self) -> DeviceInfo:
+        """Return device info for grouping sensors under the same device."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
             name="Draconic Reactor",
@@ -68,12 +75,13 @@ class CustomSensor(SensorEntity):
         )
 
     async def async_update(self):
-        # This method can be used to fetch updated data if needed.
+        """Optional: Update logic for this sensor if needed."""
         pass
 
 
 class CalculatedSensor(SensorEntity):
     def __init__(self, name, device_id, base_sensor, max_sensor, unit_of_measurement=None):
+        """Initialize a calculated sensor."""
         self._attr_name = name
         self._attr_native_value = None  # Start as None until calculated
         self._base_sensor = base_sensor
@@ -83,6 +91,7 @@ class CalculatedSensor(SensorEntity):
 
     @property
     def device_info(self) -> DeviceInfo:
+        """Return device info for grouping sensors under the same device."""
         return DeviceInfo(
             identifiers={(DOMAIN, self._device_id)},
             name="Draconic Reactor",
@@ -92,7 +101,7 @@ class CalculatedSensor(SensorEntity):
         )
 
     async def async_update(self):
-        # Fetch values from the base and max sensors
+        """Calculate percentage from the base and max sensors."""
         base_value = self._base_sensor.native_value
         max_value = self._max_sensor.native_value
 
