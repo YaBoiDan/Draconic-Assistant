@@ -1,36 +1,36 @@
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.entity import DeviceInfo
-from .const import DOMAIN
+from .const import DOMAIN, DOMAIN_Pretty
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up sensors from a config entry."""
-    device_id = "draconic_reactor"
+    DOMAIN = "draconic_reactor"
 
     # Create base sensors
-    status_sensor = CustomSensor("Status", device_id, "Unknown")
-    temperature_sensor = CustomSensor("Temperature", device_id, 0, unit_of_measurement="°C")
-    saturation_sensor = CustomSensor("Saturation", device_id, 0)
-    max_saturation_sensor = CustomSensor("Max Saturation", device_id, 0)
-    field_strength_sensor = CustomSensor("Field Strength", device_id, 0)
-    max_field_strength_sensor = CustomSensor("Max Field Strength", device_id, 0)
-    field_drain_rate_sensor = CustomSensor("Field Drain Rate", device_id, 0, unit_of_measurement="RF/t")
-    fuel_conversion_sensor = CustomSensor("Fuel Conversion", device_id, 0, unit_of_measurement="%")
-    fuel_conversion_rate_sensor = CustomSensor("Fuel Conversion Rate", device_id, 0)
-    failsafe_sensor = CustomSensor("Failsafe", device_id, "false")
-    input_energy_sensor = CustomSensor("Input Energy", device_id, 0, unit_of_measurement="RF/t")
-    output_energy_sensor = CustomSensor("Output Energy", device_id, 0, unit_of_measurement="RF/t")
+    status_sensor = CustomSensor("Status", DOMAIN, "Unknown")
+    temperature_sensor = CustomSensor("Temperature", DOMAIN, 0, unit_of_measurement="°C")
+    saturation_sensor = CustomSensor("Saturation", DOMAIN, 0)
+    max_saturation_sensor = CustomSensor("Max Saturation", DOMAIN, 0)
+    field_strength_sensor = CustomSensor("Field Strength", DOMAIN, 0)
+    max_field_strength_sensor = CustomSensor("Max Field Strength", DOMAIN, 0)
+    field_drain_rate_sensor = CustomSensor("Field Drain Rate", DOMAIN, 0, unit_of_measurement="RF/t")
+    fuel_conversion_sensor = CustomSensor("Fuel Conversion", DOMAIN, 0, unit_of_measurement="%")
+    fuel_conversion_rate_sensor = CustomSensor("Fuel Conversion Rate", DOMAIN, 0)
+    failsafe_sensor = CustomSensor("Failsafe", DOMAIN, "false")
+    input_energy_sensor = CustomSensor("Input Energy", DOMAIN, 0, unit_of_measurement="RF/t")
+    output_energy_sensor = CustomSensor("Output Energy", DOMAIN, 0, unit_of_measurement="RF/t")
 
     # Create calculated percentage sensors
     saturation_percentage_sensor = CalculatedSensor(
         "Saturation Percentage",
-        device_id,
+        DOMAIN,
         saturation_sensor,
         max_saturation_sensor,
         unit_of_measurement="%",
     )
     field_strength_percentage_sensor = CalculatedSensor(
         "Field Strength Percentage",
-        device_id,
+        DOMAIN,
         field_strength_sensor,
         max_field_strength_sensor,
         unit_of_measurement="%",
@@ -56,20 +56,23 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
 
 class CustomSensor(SensorEntity):
-    def __init__(self, name, device_id, state, unit_of_measurement=None):
+    def __init__(self, name, DOMAIN, state, unit_of_measurement=None):
         """Initialize a basic sensor."""
         self._attr_name = name
+        self._device_id = DOMAIN
+        self._sensor_name = DOMAIN_Pretty + " " + name
+        self.entity_id = f"sensor.{DOMAIN}_{name}".lower()
         self._attr_native_value = state
         self._attr_unit_of_measurement = unit_of_measurement
-        self._device_id = device_id
-        self._attr_unique_id = f"{device_id}_{name.lower().replace(' ', '_')}"
+        self._DOMAIN = DOMAIN
+        self._attr_unique_id = f"{DOMAIN}_{name.lower().replace(' ', '_')}"
 
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info for grouping sensors under the same device."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
+            identifiers={(DOMAIN, self._DOMAIN)},
             name="Draconic Reactor",
             manufacturer="YaBoiDan",
             model="1.0",
@@ -82,26 +85,27 @@ class CustomSensor(SensorEntity):
 
 
 class CalculatedSensor(SensorEntity):
-    def __init__(self, name, device_id, base_sensor, max_sensor, unit_of_measurement=None):
+    def __init__(self, name, DOMAIN, base_sensor, max_sensor, unit_of_measurement=None):
         """Initialize a calculated sensor."""
         self._attr_name = name
+        self._device_id = DOMAIN
+        self._sensor_name = DOMAIN_Pretty + " " + name
+        self.entity_id = f"sensor.{DOMAIN}_{name}".lower()
         self._attr_native_value = None  # Start as None until calculated
         self._base_sensor = base_sensor
         self._max_sensor = max_sensor
         self._attr_unit_of_measurement = unit_of_measurement
-        self._device_id = device_id
-        self._attr_unique_id = f"{device_id}_{name.lower().replace(' ', '_')}"
+        self._DOMAIN = DOMAIN
+        self._attr_unique_id = f"{DOMAIN}_{name.lower().replace(' ', '_')}"
 
 
     @property
     def device_info(self) -> DeviceInfo:
         """Return device info for grouping sensors under the same device."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self._device_id)},
+            identifiers={(DOMAIN, self._DOMAIN)},
             name="Draconic Reactor",
             manufacturer="YaBoiDan",
-            model="1.0",
-            sw_version="1.0",
         )
 
     async def async_update(self):
