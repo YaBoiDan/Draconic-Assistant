@@ -21,24 +21,38 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     output_energy_sensor = CustomSensor("Output Energy", DOMAIN, 0, unit_of_measurement="RF/t")
 
     # Create calculated percentage sensors
-    CalculatedSensor(
+    saturation_percentage_sensor = CalculatedSensor(
         "Saturation Percentage",
         DOMAIN,
         saturation_sensor,
         max_saturation_sensor,
         unit_of_measurement="%",
-    ),
-    CalculatedSensor(
+    )
+    field_strength_percentage_sensor = CalculatedSensor(
         "Field Strength Percentage",
         DOMAIN,
         field_strength_sensor,
         max_field_strength_sensor,
         unit_of_measurement="%",
-    ),
-    ]
+    )
 
     # Add all sensors to Home Assistant
-    async_add_entities(sensors, update_before_add=True)
+    async_add_entities([
+        status_sensor,
+        temperature_sensor,
+        saturation_sensor,
+        max_saturation_sensor,
+        saturation_percentage_sensor,
+        field_strength_sensor,
+        max_field_strength_sensor,
+        field_strength_percentage_sensor,
+        field_drain_rate_sensor,
+        fuel_conversion_sensor,
+        fuel_conversion_rate_sensor,
+        failsafe_sensor,
+        input_energy_sensor,
+        output_energy_sensor,
+    ], update_before_add=True)
 
 
 class CustomSensor(SensorEntity):
@@ -53,21 +67,6 @@ class CustomSensor(SensorEntity):
         self._DOMAIN = DOMAIN
         self._attr_unique_id = f"{DOMAIN}_{name.lower().replace(' ', '_')}"
 
-    @property
-    def name(self):
-        """Return the display name of the sensor."""
-        return self._sensor_name  # Display name: "Failsafe", "Temperature", etc.
-
-    @property
-    def device_info(self):
-        """Return device info to group entities under the same device."""
-        return {
-            "identifiers": {(DOMAIN, self._device_id)},
-            "name": "Draconic Reactor",
-            "manufacturer": "YaboiDan",
-            "model": "1.0",
-            "sw_version": "1.0",
-        }
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -75,9 +74,7 @@ class CustomSensor(SensorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, self._DOMAIN)},
             name="Draconic Reactor",
-            manufacturer="YaBoiDan",
-            model="1.0",
-            sw_version="1.0",
+            manufacturer="YaBoiDan"
         )
 
     async def async_update(self):
@@ -99,21 +96,6 @@ class CalculatedSensor(SensorEntity):
         self._DOMAIN = DOMAIN
         self._attr_unique_id = f"{DOMAIN}_{name.lower().replace(' ', '_')}"
 
-    @property
-    def name(self):
-        """Return the display name of the sensor."""
-        return self._sensor_name  # Display name: "Field Strength Percentage"
-
-    @property
-    def device_info(self):
-        """Return device info to group entities under the same device."""
-        return {
-            "identifiers": {(DOMAIN, self._device_id)},
-            "name": "Draconic Reactor",
-            "manufacturer": "YaboiDan",
-            "model": "1.0",
-            "sw_version": "1.0",
-        }
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -122,6 +104,7 @@ class CalculatedSensor(SensorEntity):
             identifiers={(DOMAIN, self._DOMAIN)},
             name="Draconic Reactor",
             manufacturer="YaBoiDan",
+            model="1.0",
         )
 
     async def async_update(self):
