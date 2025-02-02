@@ -58,6 +58,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class CustomSensor(SensorEntity):
     def __init__(self, name, DOMAIN, state, unit_of_measurement=None):
         """Initialize a basic sensor."""
+        self._attr_should_poll = False  # Prevent Home Assistant from polling
         self._attr_name = name
         self._device_id = DOMAIN
         self._sensor_name = DOMAIN_Pretty + " " + name
@@ -74,7 +75,7 @@ class CustomSensor(SensorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, self._DOMAIN)},
             name="Draconic Reactor",
-            manufacturer="YaBoiDan"
+            manufacturer="YaBoiDan",
         )
 
     async def async_update(self):
